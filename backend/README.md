@@ -21,7 +21,7 @@ Parameters:
 GET /restaurants/{id}/menu-item
 GET /restaurants/{id}/popular-dishes
 
-## 4. MenuItem
+## 4. Menu API
 POST /menu-item
 
 Parameters:
