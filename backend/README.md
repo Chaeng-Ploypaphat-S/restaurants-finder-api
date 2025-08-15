@@ -18,9 +18,9 @@ Parameters:
 - Menu
 - Rating
 
-## 3. Menu & Popular Dishes API
-GET /restaurants/{id}/menu-item
-GET /restaurants/{id}/popular-dishes
+## 3. Menu API
+GET /restaurants/{id}/menu-items
+
 
 POST /menu-item
 
@@ -28,3 +28,12 @@ Parameters:
 - name
 - description
 - price
+
+
+## 4. Popular Dish API
+GET /restaurants/{id}/popular-dishes
+
+POST /popular-dish
+
+Parameters:
+- name

@@ -1,7 +1,6 @@
-
 from flask import jsonify, request
 
-from backend.models import db, app, Restaurant, MenuItem
+from backend.models import db, app, Restaurant, MenuItem, PopularDish
 
 # Add MenuItem API
 @app.route('/menu-item', methods=['POST'])
@@ -22,6 +21,23 @@ def add_menu_item():
         "name": menu_item.name,
         "description": menu_item.description,
         "price": menu_item.price
+    }), 201
+    
+# Add PopularDish API
+@app.route('/popular-dish', methods=['POST'])
+def add_popular_dish():
+    data = request.get_json()
+    required_fields = ['name']
+    if any(field not in data for field in required_fields):
+        return jsonify({"error": "Missing required fields"}), 400
+    popular_dish = PopularDish(
+        name=data['name']
+    )
+    db.session.add(popular_dish)
+    db.session.commit()
+    return jsonify({
+        "id": popular_dish.id,
+        "name": popular_dish.name
     }), 201
 
 # Restaurants Search API
