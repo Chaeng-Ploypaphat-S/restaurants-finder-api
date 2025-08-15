@@ -1,6 +1,10 @@
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-db = SQLAlchemy()
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///restaurants_finder.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
 # Association table for Restaurant <-> MenuItem
 restaurant_menuitem = db.Table('restaurant_menuitem',
@@ -37,3 +41,6 @@ class PopularDish(db.Model):
     __tablename__ = 'popular_dish'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
+    
+with app.app_context():
+    db.create_all()
