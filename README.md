@@ -1,9 +1,5 @@
-# restaurants-finder-api
-A restaurant discovery API
-
-
-
-A simple RESTful API built with Flask for finding restaurants.
+# Restaurants Finder API
+A simple RESTful API built with Flask for finding restaurants along with their menus and popular dishes.
 
 ## Setup Instructions
 
