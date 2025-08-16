@@ -1,0 +1,66 @@
+openapi: 3.0.3
+info:
+  title: Restaurant Finder API
+  version: 1.0.0
+  description: API to retrieve restaurant details by ID.
+
+servers:
+  - url: http://localhost:5000
+    description: Local Flask development server
+
+paths:
+  /restaurant/{restaurant_id}:
+    get:
+      summary: Get restaurant details
+      description: Returns details of a specific restaurant by its ID.
+      parameters:
+        - in: path
+          name: restaurant_id
+          required: true
+          schema:
+            type: integer
+          description: Unique ID of the restaurant
+      responses:
+        "200":
+          description: Successful response with restaurant details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 123
+                  name:
+                    type: string
+                    example: The French Cuisine CA
+                  address:
+                    type: string
+                    example: 6640 Washington St, Yountville, CA
+                  phone:
+                    type: string
+                    example: "+1-707-944-2380"
+                  website:
+                    type: string
+                    example: "https://www.thefrenchcuisine.com"
+                  cuisine:
+                    type: string
+                    example: French
+                  latitude:
+                    type: number
+                    format: float
+                    example: 38.4043
+                  longitude:
+                    type: number
+                    format: float
+                    example: -122.3647
+        "404":
+          description: Restaurant not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Restaurant with id 123 not found."
