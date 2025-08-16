@@ -67,7 +67,7 @@ def search_restaurants():
     latitude = request.args.get('latitude', type=float)
     longitude = request.args.get('longitude', type=float)
     restaurants = Restaurant.query
-    # Require at least one: cuisine or (latitude & longitude)
+
     if not cuisine and (latitude is None or longitude is None):
         return jsonify({"error": "At least one of 'cuisine' or both 'latitude' and 'longitude' is required."}), 400
     if cuisine:
