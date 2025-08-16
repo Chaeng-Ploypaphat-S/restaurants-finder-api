@@ -1,6 +1,15 @@
+"""
+Author: Ploypaphat (Chaeng) Saltz
+File: routes.py
+Description: Flask endpoints for Restaurant Finder API.
+Created: August 2025
+Copyright (c) Ploypaphat (Chaeng) Saltz. All rights reserved.
+"""
+
+
 from flask import jsonify, request
 
-from backend.models import db, app, Restaurant, MenuItem, RestaurantMenuItem, PopularDish
+from src.models import db, app, Restaurant, MenuItem, RestaurantMenuItem, PopularDish, RestaurantPopularDish
 
 # Add MenuItem API
 @app.route('/menu-item', methods=['POST'])
@@ -60,24 +69,15 @@ def add_popular_dish():
         "name": popular_dish.name
     }), 201
 
-# Restaurants Search API
+# List Restaurants By Cuisine API
 @app.route('/restaurants', methods=['GET'])
 def search_restaurants():
     cuisine = request.args.get('cuisine')
-    latitude = request.args.get('latitude', type=float)
-    longitude = request.args.get('longitude', type=float)
     restaurants = Restaurant.query
-
-    if not cuisine and (latitude is None or longitude is None):
-        return jsonify({"error": "At least one of 'cuisine' or both 'latitude' and 'longitude' is required."}), 400
     if cuisine:
-        restaurants = restaurants.filter(Restaurant.cuisine.ilike(f'%{cuisine}%'))
-    if latitude is not None and longitude is not None:
-        lat_range = (latitude - 0.01, latitude + 0.01)
-        lon_range = (longitude - 0.01, longitude + 0.01)
-        restaurants = restaurants.filter(Restaurant.latitude.between(*lat_range), Restaurant.longitude.between(*lon_range))
-    ids = [r.id for r in restaurants.all()]
-    return jsonify({"restaurant_ids": ids})
+        restaurants = restaurants.filter(Restaurant.cuisine == cuisine)
+    names = [r.name for r in restaurants.all()]
+    return jsonify({"restaurants": names})
 
 # Restaurant Create API
 @app.route('/restaurant/', methods=['POST'])
@@ -124,20 +124,9 @@ def restaurant_details(restaurant_id):
         "latitude": r.latitude,
         "longitude": r.longitude
     })
-
-# Menu & Popular Dishes API
-@app.route('/restaurant/<int:restaurant_id>/menu', methods=['GET'])
-def restaurant_popular_dishes(restaurant_id):
-    r = RestaurantMenuItem.query.get(restaurant_id)
-    if r is None:
-        return jsonify({"error": f"Restaurant with id {restaurant_id} not found."}), 404
-    return jsonify({
-        "restaurant_id": restaurant_id,
-        "popular_dishes": []
-    })
-    
+ 
 @app.route('/restaurant/<int:restaurant_id>/menu', methods=['POST'])
-def add_restaurant_popular_dishes(restaurant_id):
+def add_restaurant_menu(restaurant_id):
     
     data = request.get_json(force=True)
 
@@ -148,22 +137,122 @@ def add_restaurant_popular_dishes(restaurant_id):
     m = MenuItem.query.filter_by(name=data['menu']).first()
 
     if m is None:
-        menu_item = MenuItem(name=data['menu'])
-        db.session.add(menu_item)
+        m = MenuItem(name=data['menu'])
+        db.session.add(m)
         db.session.commit()
 
     try:
-        restaurant_menu_item = RestaurantMenuItem(restaurant_id=int(restaurant_id), menuitem_id=m.id if m else menu_item.id)
+        restaurant_menu_item = RestaurantMenuItem(restaurant_id=int(restaurant_id), menuitem_id=m.id)
         db.session.add(restaurant_menu_item)
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": f"Database error: {str(e)}"}), 500
+        return jsonify({"error": f"Database error: failed to create restaurant menu item {str(e)}"}), 500
 
     return jsonify({
         "restaurant_id": restaurant_id,
-        "popular_dishes": data['menu']
+        "menu": m.name
     })
+    
+@app.route('/restaurant/<int:restaurant_id>/popular', methods=['POST'])
+def add_restaurant_popular_dish(restaurant_id):
+
+    data = request.get_json(force=True)
+
+    r = Restaurant.query.get(restaurant_id)
+    if r is None:
+        return jsonify({"error": f"Restaurant with id {restaurant_id} not found."}), 404
+    
+    p = PopularDish.query.filter_by(name=data['menu']).first()
+
+    if p is None:
+        p = PopularDish(name=data['menu'])
+        db.session.add(p)
+        db.session.commit()
+
+    try:
+        restaurant_popular_dish = RestaurantPopularDish(restaurant_id=int(restaurant_id), populardish_id=p.id)
+        db.session.add(restaurant_popular_dish)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Database error: failed to create restaurant popular dish {str(e)}"}), 500
+
+    return jsonify({
+        "restaurant_id": restaurant_id,
+        "popular_dish": p.name
+    })
+    
+
+@app.route('/data-vendors', methods=['GET'])
+def show_data_vendors():
+    menu_items = MenuItem.query.all()
+    menu_items_json = [
+        {
+            "id": item.id,
+            "name": item.name,
+            "description": item.description,
+            "price": item.price,
+        }
+        for item in menu_items
+    ]
+    menu_data = {"count": len(menu_items_json), "data": menu_items_json}
+
+    popular_items = PopularDish.query.all()
+    popular_dishes_json = [
+        {
+            "id": item.id,
+            "name": item.name,
+        }
+        for item in popular_items
+    ]
+    popular_dishes_data = {"count": len(popular_dishes_json), "data": popular_dishes_json}
+
+    restaurant_items = Restaurant.query.all()
+    restaurant_json = [
+        {
+            "id": r.id,
+            "name": r.name,
+            "address": r.address,
+            "phone": r.phone,
+            "website": r.website,
+            "cuisine": r.cuisine,
+            "latitude": r.latitude,
+            "longitude": r.longitude
+        }
+        for r in restaurant_items
+    ]
+    restaurant_data = {"count": len(restaurant_json), "data": restaurant_json}
+    
+    restaurant_menu_items = RestaurantMenuItem.query.all()
+    restaurant_menu_json = [
+        {
+            "id": item.id,
+            "restaurant_id": item.restaurant_id,
+            "menuitem_id": item.menuitem_id
+        }
+        for item in restaurant_menu_items
+    ]
+    restaurant_menu_data = {"count": len(restaurant_menu_json), "data": restaurant_menu_json}
+
+    restaurant_popular_dishes = RestaurantPopularDish.query.all()
+    restaurant_popular_json = [
+        {
+            "id": item.id,
+            "restaurant_id": item.restaurant_id,
+            "populardish_id": item.populardish_id
+        }
+        for item in restaurant_popular_dishes
+    ]
+    restaurant_popular_data = {"count": len(restaurant_popular_json), "data": restaurant_popular_json}
+
+    return jsonify({
+        "menu_items": menu_data,
+        "popular_dishes": popular_dishes_data,
+        "restaurants": restaurant_data,
+        "restaurant_menu_items": restaurant_menu_data,
+        "restaurant_popular_dishes": restaurant_popular_data
+    }), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,4 +1,4 @@
-from backend import routes
+from src import routes
 
 app = routes.app
 
