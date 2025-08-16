@@ -6,18 +6,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///restaurants_finder.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# Association table for Restaurant <-> MenuItem
-restaurant_menuitem = db.Table('restaurant_menuitem',
-    db.Column('restaurant_id', db.Integer, db.ForeignKey('restaurant.id'), primary_key=True),
-    db.Column('menuitem_id', db.Integer, db.ForeignKey('menu_item.id'), primary_key=True)
-)
-
-# Association table for Restaurant <-> PopularDish
-restaurant_populardish = db.Table('restaurant_populardish',
-    db.Column('restaurant_id', db.Integer, db.ForeignKey('restaurant.id'), primary_key=True),
-    db.Column('populardish_id', db.Integer, db.ForeignKey('popular_dish.id'), primary_key=True)
-)
-
 class Restaurant(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -28,14 +16,22 @@ class Restaurant(db.Model):
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
     rating = db.Column(db.Float)
-    menu_items = db.relationship('MenuItem', secondary=restaurant_menuitem, backref='restaurants')
 
 class MenuItem(db.Model):
     __tablename__ = 'menu_item'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
-    description = db.Column(db.Text)
-    price = db.Column(db.Float)
+    description = db.Column(db.Text, nullable=True)
+    price = db.Column(db.Float, default=0.0)
+    
+class RestaurantMenuItem(db.Model):
+    __tablename__ = 'restaurant_menuitem'
+    id = db.Column(db.Integer, primary_key=True)
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'))
+    menuitem_id = db.Column(db.Integer, db.ForeignKey('menu_item.id'))
+
+    restaurant = db.relationship('Restaurant', backref=db.backref('menuitem_links', cascade='all, delete-orphan'))
+    menu_item = db.relationship('MenuItem', backref=db.backref('restaurant_links', cascade='all, delete-orphan'))
     
 class PopularDish(db.Model):
     __tablename__ = 'popular_dish'

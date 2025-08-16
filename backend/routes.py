@@ -1,26 +1,19 @@
 from flask import jsonify, request
 
-from backend.models import db, app, Restaurant, MenuItem, PopularDish
+from backend.models import db, app, Restaurant, MenuItem, RestaurantMenuItem, PopularDish
 
 # Add MenuItem API
 @app.route('/menu-item', methods=['POST'])
 def add_menu_item():
-    try:
-        data = request.get_json(force=True)
-    except Exception:
-        return jsonify({"error": "Invalid JSON format."}), 400
-
+    data = request.get_json(force=True)
     required_fields = ['name', 'description', 'price']
     if any(field not in data for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
 
     if not isinstance(data['name'], str) or not data['name'].strip():
         return jsonify({"error": "'name' must be a non-empty string."}), 400
-
-    try:
-        price = float(data['price'])
-    except (ValueError, TypeError):
-        return jsonify({"error": "'price' must be a number."}), 400
+    
+    price = float(data['price'])
 
     try:
         menu_item = MenuItem(
@@ -87,7 +80,7 @@ def search_restaurants():
     return jsonify({"restaurant_ids": ids})
 
 # Restaurant Create API
-@app.route('/restaurants/', methods=['POST'])
+@app.route('/restaurant/', methods=['POST'])
 def create_restaurant():
     data = request.get_json()
     required_fields = ['name', 'address', 'phone', 'cuisine', 'website', 'latitude', 'longitude']
@@ -116,7 +109,7 @@ def create_restaurant():
     }), 201
 
 # Restaurant Details API
-@app.route('/restaurants/<int:restaurant_id>', methods=['GET'])
+@app.route('/restaurant/<int:restaurant_id>', methods=['GET'])
 def restaurant_details(restaurant_id):
     r = Restaurant.query.get(restaurant_id)
     if r is None:
@@ -132,22 +125,45 @@ def restaurant_details(restaurant_id):
         "longitude": r.longitude
     })
 
-# Reviews & Ratings API
-@app.route('/restaurants/<int:restaurant_id>/reviews', methods=['GET'])
-def restaurant_reviews(restaurant_id):
-    return jsonify({
-        "restaurant_id": restaurant_id,
-        "reviews": []
-    })
-
 # Menu & Popular Dishes API
-@app.route('/restaurants/<int:restaurant_id>/menu', methods=['GET'])
+@app.route('/restaurant/<int:restaurant_id>/menu', methods=['GET'])
 def restaurant_popular_dishes(restaurant_id):
+    r = RestaurantMenuItem.query.get(restaurant_id)
+    if r is None:
+        return jsonify({"error": f"Restaurant with id {restaurant_id} not found."}), 404
     return jsonify({
         "restaurant_id": restaurant_id,
         "popular_dishes": []
     })
     
+@app.route('/restaurant/<int:restaurant_id>/menu', methods=['POST'])
+def add_restaurant_popular_dishes(restaurant_id):
     
+    data = request.get_json(force=True)
+
+    r = Restaurant.query.get(restaurant_id)
+    if r is None:
+        return jsonify({"error": f"Restaurant with id {restaurant_id} not found."}), 404
+    
+    m = MenuItem.query.filter_by(name=data['menu']).first()
+
+    if m is None:
+        menu_item = MenuItem(name=data['menu'])
+        db.session.add(menu_item)
+        db.session.commit()
+
+    try:
+        restaurant_menu_item = RestaurantMenuItem(restaurant_id=int(restaurant_id), menuitem_id=m.id if m else menu_item.id)
+        db.session.add(restaurant_menu_item)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Database error: {str(e)}"}), 500
+
+    return jsonify({
+        "restaurant_id": restaurant_id,
+        "popular_dishes": data['menu']
+    })
+
 if __name__ == '__main__':
     app.run(debug=True)
