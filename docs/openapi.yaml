@@ -1,66 +1,220 @@
-openapi: 3.0.3
+openapi: 3.0.0
 info:
   title: Restaurant Finder API
   version: 1.0.0
-  description: API to retrieve restaurant details by ID.
-
+  description: API for searching restaurants, menu items, and popular dishes.
 servers:
   - url: http://localhost:5000
-    description: Local Flask development server
-
 paths:
-  /restaurant/{restaurant_id}:
+  /restaurants:
+    get:
+      summary: Search restaurants by cuisine
+      parameters:
+        - name: cuisine
+          in: query
+          description: Cuisine type to filter restaurants
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of restaurants
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  restaurants:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Restaurant'
+  /restaurant/{id}:
     get:
       summary: Get restaurant details
-      description: Returns details of a specific restaurant by its ID.
       parameters:
-        - in: path
-          name: restaurant_id
+        - name: id
+          in: path
           required: true
           schema:
             type: integer
-          description: Unique ID of the restaurant
       responses:
-        "200":
-          description: Successful response with restaurant details
+        '200':
+          description: Restaurant details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Restaurant'
+  /restaurant:
+    post:
+      summary: Add a new restaurant record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Restaurant'
+      responses:
+        '201':
+          description: Restaurant created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Restaurant'
+  /restaurant/{id}/menu:
+    get:
+      summary: Get menu items for a restaurant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of menu items
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  id:
-                    type: integer
-                    example: 123
-                  name:
-                    type: string
-                    example: The French Cuisine CA
-                  address:
-                    type: string
-                    example: 6640 Washington St, Yountville, CA
-                  phone:
-                    type: string
-                    example: "+1-707-944-2380"
-                  website:
-                    type: string
-                    example: "https://www.thefrenchcuisine.com"
-                  cuisine:
-                    type: string
-                    example: French
-                  latitude:
-                    type: number
-                    format: float
-                    example: 38.4043
-                  longitude:
-                    type: number
-                    format: float
-                    example: -122.3647
-        "404":
-          description: Restaurant not found
+                  menu_items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MenuItem'
+  /menu-item:
+    post:
+      summary: Add a new menu item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuItemInput'
+      responses:
+        '201':
+          description: Menu item created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuItem'
+  /restaurant/{id}/popular:
+    get:
+      summary: Get popular dishes for a restaurant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of popular dishes
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error:
-                    type: string
-                    example: "Restaurant with id 123 not found."
+                  popular_dishes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PopularDish'
+  /popular-dish:
+    post:
+      summary: Add a new popular dish
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PopularDishInput'
+      responses:
+        '201':
+          description: Popular dish created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PopularDish'
+components:
+  schemas:
+    Restaurant:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+        website:
+          type: string
+        cuisine:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+    RestaurantInput:
+      type: object
+      required:
+        - name
+        - address
+        - phone
+        - cuisine
+        - website
+        - latitude
+        - longitude
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+        website:
+          type: string
+        cuisine:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+    MenuItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+    MenuItemInput:
+      type: object
+      required:
+        - name
+        - description
+        - price
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+    PopularDish:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    PopularDishInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string

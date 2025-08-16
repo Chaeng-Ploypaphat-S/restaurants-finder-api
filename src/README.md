@@ -1,26 +1,22 @@
 
 ## 1. Restaurant Search API
-GET /restaurants?query=pizza&location=47.6062,-122.3321&radius=5000&cuisine=italian
+GET /restaurants?cuisine=italian
 
 Parameters:
-- query – keywords (e.g., "pizza", "ramen")
-- location – lat/long for search center
 - cuisine
 
 ## 2. Restaurant Details API
-GET /restaurants/{id}
+GET /restaurant/{id}
 
-POST /restaurants
+POST /restaurant
 
 Parameters:
 - Name, address, phone, website
-- Hours of operation
-- Menu
-- Rating
+- Cuisine
+- Latitude & longitude
 
 ## 3. Menu API
-GET /restaurants/{id}/menu-items
-
+GET /restaurant/{id}/menu
 
 POST /menu-item
 
@@ -29,9 +25,8 @@ Parameters:
 - description
 - price
 
-
 ## 4. Popular Dish API
-GET /restaurants/{id}/popular-dishes
+GET /restaurant/{id}/popular
 
 POST /popular-dish
 
