@@ -1,5 +1,5 @@
 import unittest
-from src.models import app, db, Restaurant, MenuItem, RestaurantMenuItem
+from src.models import app, db, Restaurant, MenuItem, RestaurantMenuItem, PopularDish, RestaurantPopularDish
 
 class ModelTestCase(unittest.TestCase):
 	def setUp(self):
@@ -40,6 +40,26 @@ class ModelTestCase(unittest.TestCase):
 		self.assertIsNotNone(link.id)
 		self.assertEqual(link.restaurant.name, "Testaurant")
 		self.assertEqual(link.menu_item.name, "Pizza")
+
+	def test_create_popular_dish(self):
+		d = PopularDish(name="Spaghetti")
+		db.session.add(d)
+		db.session.commit()
+		self.assertIsNotNone(d.id)
+		self.assertEqual(d.name, "Spaghetti")
+
+	def test_create_restaurant_popular_dish(self):
+		r = Restaurant(name="Testaurant", address="123 Test St", phone="1234567890", website="http://test.com", cuisine="Test", latitude=1.23, longitude=4.56, rating=5.0)
+		d = PopularDish(name="Spaghetti")
+		db.session.add(r)
+		db.session.add(d)
+		db.session.commit()
+		link = RestaurantPopularDish(restaurant=r, popular_dish=d)
+		db.session.add(link)
+		db.session.commit()
+		self.assertIsNotNone(link.id)
+		self.assertEqual(link.restaurant.name, "Testaurant")
+		self.assertEqual(link.popular_dish.name, "Spaghetti")
 
 if __name__ == "__main__":
 	unittest.main()
