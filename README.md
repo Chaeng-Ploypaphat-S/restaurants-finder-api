@@ -1,7 +1,7 @@
 # Restaurants Finder API
 RESTful API built with Flask for finding restaurants along with their menus and popular dishes.
 
-## Tech
+## Technology
 - Flask
 - SQLAlchemy
 
@@ -17,3 +17,7 @@ pip install -r requirements.txt
 python run.py
 ```
 The API will be available at `http://127.0.0.1:5000`.
+
+## Documentation
+
+https://chaeng-ploypaphat-s.github.io/restaurants-finder-api/
