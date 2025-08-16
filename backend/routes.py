@@ -5,17 +5,35 @@ from backend.models import db, app, Restaurant, MenuItem, PopularDish
 # Add MenuItem API
 @app.route('/menu-item', methods=['POST'])
 def add_menu_item():
-    data = request.get_json()
+    try:
+        data = request.get_json(force=True)
+    except Exception:
+        return jsonify({"error": "Invalid JSON format."}), 400
+
     required_fields = ['name', 'description', 'price']
     if any(field not in data for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
-    menu_item = MenuItem(
-        name=data['name'],
-        description=data['description'],
-        price=data['price']
-    )
-    db.session.add(menu_item)
-    db.session.commit()
+
+    if not isinstance(data['name'], str) or not data['name'].strip():
+        return jsonify({"error": "'name' must be a non-empty string."}), 400
+
+    try:
+        price = float(data['price'])
+    except (ValueError, TypeError):
+        return jsonify({"error": "'price' must be a number."}), 400
+
+    try:
+        menu_item = MenuItem(
+            name=data['name'],
+            description=data['description'],
+            price=price
+        )
+        db.session.add(menu_item)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Database error: {str(e)}"}), 500
+
     return jsonify({
         "id": menu_item.id,
         "name": menu_item.name,
@@ -30,11 +48,20 @@ def add_popular_dish():
     required_fields = ['name']
     if any(field not in data for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
-    popular_dish = PopularDish(
-        name=data['name']
-    )
-    db.session.add(popular_dish)
-    db.session.commit()
+
+    if not isinstance(data['name'], str) or not data['name'].strip():
+        return jsonify({"error": "'name' must be a non-empty string."}), 400
+
+    try:
+        popular_dish = PopularDish(
+            name=data['name']
+        )
+        db.session.add(popular_dish)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Database error: {str(e)}"}), 500
+
     return jsonify({
         "id": popular_dish.id,
         "name": popular_dish.name
@@ -120,6 +147,7 @@ def restaurant_popular_dishes(restaurant_id):
         "restaurant_id": restaurant_id,
         "popular_dishes": []
     })
-
+    
+    
 if __name__ == '__main__':
     app.run(debug=True)
