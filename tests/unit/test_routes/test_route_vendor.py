@@ -1,6 +1,6 @@
 import unittest
 import json
-from src.models import app, db, Restaurant, MenuItem, PopularDish, RestaurantMenuItem, RestaurantPopularDish
+from src.models.vendor import app, db, Restaurant, MenuItem, PopularDish, RestaurantMenuItem, RestaurantPopularDish
 
 class RouteTestCase(unittest.TestCase):
     def setUp(self):

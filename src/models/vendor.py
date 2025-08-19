@@ -9,10 +9,10 @@ Copyright (c) Ploypaphat (Chaeng) Saltz. All rights reserved.
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from src.config import Config
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///restaurants_finder.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config.from_object(Config)
 db = SQLAlchemy(app)
 
 class Restaurant(db.Model):

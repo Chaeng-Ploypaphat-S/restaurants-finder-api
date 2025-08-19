@@ -9,7 +9,7 @@ Copyright (c) Ploypaphat (Chaeng) Saltz. All rights reserved.
 
 from flask import jsonify, request
 
-from src.models import db, app, Restaurant, MenuItem, RestaurantMenuItem, PopularDish, RestaurantPopularDish
+from src.models.vendor import db, app, Restaurant, MenuItem, RestaurantMenuItem, PopularDish, RestaurantPopularDish
 
 # Add MenuItem API
 @app.route('/menu-item', methods=['POST'])
