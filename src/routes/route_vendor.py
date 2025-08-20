@@ -125,6 +125,53 @@ def restaurant_details(restaurant_id):
         "longitude": r.longitude
     })
  
+@app.route('/restaurant/<int:restaurant_id>', methods=['DELETE'])
+def delete_restaurant(restaurant_id):
+    r = Restaurant.query.get(restaurant_id)
+    if r is None:
+        return jsonify({"error": f"Restaurant with id {restaurant_id} not found."}), 404
+    try:
+        db.session.delete(r)
+        db.session.commit()
+        return jsonify({"message": f"Restaurant with id {restaurant_id} deleted successfully."}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Database error: {str(e)}"}), 500
+    
+@app.route('/restaurant/<int:restaurant_id>', methods=['PUT'])
+def update_restaurant(restaurant_id):
+    r = Restaurant.query.get(restaurant_id)
+    if r is None:
+        return jsonify({"error": f"Restaurant with id {restaurant_id} not found."}), 404
+
+    data = request.get_json()
+    allowed_fields = ['name', 'address', 'phone', 'website', 'cuisine', 'latitude', 'longitude']
+    updated = False
+
+    for field in allowed_fields:
+        if field in data:
+            setattr(r, field, data[field])
+            updated = True
+
+    if not updated:
+        return jsonify({"error": "No valid fields provided for update."}), 400
+
+    try:
+        db.session.commit()
+        return jsonify({
+            "id": r.id,
+            "name": r.name,
+            "address": r.address,
+            "phone": r.phone,
+            "website": r.website,
+            "cuisine": r.cuisine,
+            "latitude": r.latitude,
+            "longitude": r.longitude
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Database error: {str(e)}"}), 500
+
 @app.route('/restaurant/<int:restaurant_id>/menu', methods=['POST'])
 def add_restaurant_menu(restaurant_id):
     
