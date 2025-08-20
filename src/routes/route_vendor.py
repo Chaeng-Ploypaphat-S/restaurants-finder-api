@@ -134,10 +134,10 @@ def add_restaurant_menu(restaurant_id):
     if r is None:
         return jsonify({"error": f"Restaurant with id {restaurant_id} not found."}), 404
     
-    m = MenuItem.query.filter_by(name=data['menu']).first()
+    m = MenuItem.query.filter_by(name=data['name']).first()
 
     if m is None:
-        m = MenuItem(name=data['menu'])
+        m = MenuItem(name=data['name'])
         db.session.add(m)
         db.session.commit()
 
@@ -151,7 +151,7 @@ def add_restaurant_menu(restaurant_id):
 
     return jsonify({
         "restaurant_id": restaurant_id,
-        "menu": m.name
+        "menu name": m.name
     })
     
 @app.route('/restaurant/<int:restaurant_id>/popular', methods=['POST'])
@@ -163,10 +163,10 @@ def add_restaurant_popular_dish(restaurant_id):
     if r is None:
         return jsonify({"error": f"Restaurant with id {restaurant_id} not found."}), 404
     
-    p = PopularDish.query.filter_by(name=data['menu']).first()
+    p = PopularDish.query.filter_by(name=data['name']).first()
 
     if p is None:
-        p = PopularDish(name=data['menu'])
+        p = PopularDish(name=data['name'])
         db.session.add(p)
         db.session.commit()
 
@@ -180,11 +180,11 @@ def add_restaurant_popular_dish(restaurant_id):
 
     return jsonify({
         "restaurant_id": restaurant_id,
-        "popular_dish": p.name
+        "popular-dish name": p.name
     })
     
 
-@app.route('/data-vendors', methods=['GET'])
+@app.route('/data-vendor', methods=['GET'])
 def show_data_vendors():
     menu_items = MenuItem.query.all()
     menu_items_json = [

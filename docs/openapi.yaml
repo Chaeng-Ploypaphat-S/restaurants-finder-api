@@ -8,7 +8,7 @@ servers:
 paths:
   /restaurants:
     get:
-      summary: Search restaurants by cuisine
+      summary: Search all restaurants or optionally filter by cuisine
       parameters:
         - name: cuisine
           in: query
@@ -60,27 +60,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Restaurant'
+
   /restaurant/{id}/menu:
-    get:
-      summary: Get menu items for a restaurant
+    post:
+      summary: Add a new menu item for a restaurant
       parameters:
         - name: id
           in: path
           required: true
           schema:
             type: integer
-      responses:
-        '200':
-          description: List of menu items
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  menu_items:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/MenuItem'
+
   /menu-item:
     post:
       summary: Add a new menu item
@@ -98,26 +88,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/MenuItem'
   /restaurant/{id}/popular:
-    get:
-      summary: Get popular dishes for a restaurant
+    post:
+      summary: Add a new popular dish for a restaurant
       parameters:
         - name: id
           in: path
           required: true
           schema:
             type: integer
-      responses:
-        '200':
-          description: List of popular dishes
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  popular_dishes:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/PopularDish'
+
   /popular-dish:
     post:
       summary: Add a new popular dish
