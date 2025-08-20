@@ -22,4 +22,4 @@ The API will be available at `http://127.0.0.1:5000`.
 
 https://chaeng-ploypaphat-s.github.io/restaurants-finder-api/
 
-![](image-1.png)
+![](image-2.png)
