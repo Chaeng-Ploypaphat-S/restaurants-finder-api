@@ -44,9 +44,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Restaurant'
-  /restaurant:
-    post:
-      summary: Add a new restaurant record
+    put:
+      summary: Update a restaurant record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -60,6 +65,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Restaurant'
+    delete:
+      summary: Delete a restaurant record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Restaurant deleted successfully
 
   /restaurant/{id}/menu:
     post:
